@@ -1,0 +1,4 @@
+flask
+pypdf
+openpyxl
+gunicorn

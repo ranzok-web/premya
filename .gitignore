@@ -1,0 +1,4 @@
+cloudflared.exe
+gh.exe
+__pycache__/
+*.pyc
