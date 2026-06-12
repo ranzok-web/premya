@@ -1,4 +1,4 @@
-services:
+﻿services:
   - type: web
     name: premya
     runtime: python
@@ -7,3 +7,6 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+
+# Auto-deploy on push to main
+
