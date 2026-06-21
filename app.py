@@ -284,16 +284,19 @@ UPLOAD_HTML = """<!DOCTYPE html>
 <title>פרמיה מדריך עיוני</title>
 <style>
 *{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px;min-height:100vh}
-.box{max-width:580px;margin:auto;background:#fff;border-radius:12px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-h1{color:#1a365d;margin-bottom:6px;font-size:clamp(20px,5vw,28px)}
-p.sub{color:#4a5568;margin-bottom:24px;font-size:clamp(14px,3.5vw,16px)}
-.upload{border:2px dashed #90cdf4;border-radius:8px;padding:28px 16px;text-align:center;background:#ebf8ff;margin-bottom:20px}
-.upload .icon{font-size:clamp(40px,12vw,56px)}
-input[type=file]{display:block;margin:12px auto;font-size:clamp(15px,4vw,17px);width:100%;max-width:320px}
-button{background:#2b6cb0;color:#fff;border:none;padding:16px 32px;border-radius:6px;font-size:clamp(16px,4.5vw,18px);cursor:pointer;width:100%;margin-top:4px}
-button:hover{background:#2c5282}
-.err{background:#fff5f5;border:1px solid #fed7d7;color:#c53030;padding:12px;border-radius:6px;margin-top:14px;font-size:15px}
+html,body{height:100%;margin:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;padding:0;min-height:100vh;display:flex;flex-direction:column}
+.box{flex:1;width:100%;max-width:600px;margin:0 auto;background:#fff;padding:32px 24px;display:flex;flex-direction:column;justify-content:center}
+@media(min-width:640px){body{padding:24px;align-items:center;justify-content:center}.box{border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1);flex:none;width:100%}}
+h1{color:#1a365d;margin:0 0 10px;font-size:28px}
+p.sub{color:#4a5568;margin:0 0 28px;font-size:17px}
+.upload{border:2px dashed #90cdf4;border-radius:10px;padding:36px 20px;text-align:center;background:#ebf8ff;margin-bottom:24px}
+.upload .icon{font-size:56px;display:block;margin-bottom:8px}
+.upload p{margin:0 0 12px;font-size:17px;color:#2c5282}
+input[type=file]{display:block;margin:0 auto;font-size:17px;width:100%}
+button{background:#2b6cb0;color:#fff;border:none;padding:18px;border-radius:8px;font-size:20px;cursor:pointer;width:100%;margin-top:8px;font-weight:bold}
+button:active{background:#2c5282}
+.err{background:#fff5f5;border:1px solid #fed7d7;color:#c53030;padding:14px;border-radius:8px;margin-top:16px;font-size:16px}
 </style></head><body><div class="box">
 <h1>🚂 פרמיה מדריך עיוני</h1>
 <p class="sub">העלה גיליון נוכחות PDF מחילן – הנתונים יחולצו אוטומטית.</p>
@@ -311,23 +314,24 @@ CONFIRM_HTML = """<!DOCTYPE html>
 <title>אישור נתונים</title>
 <style>
 *{box-sizing:border-box}
-body{font-family:Arial,sans-serif;background:#f0f4f8;margin:0;padding:16px;min-height:100vh}
-.box{max-width:620px;margin:auto;background:#fff;border-radius:12px;padding:28px 20px;box-shadow:0 4px 20px rgba(0,0,0,.1)}
-h1{color:#1a365d;margin-bottom:6px;font-size:clamp(20px,5vw,28px)}
-p.sub{color:#4a5568;margin-bottom:20px;font-size:clamp(14px,3.5vw,16px)}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-label{display:block;font-weight:bold;color:#2d3748;margin-bottom:4px;font-size:clamp(13px,3.5vw,15px)}
-input[type=text]{width:100%;padding:11px 12px;border:1px solid #cbd5e0;border-radius:6px;font-size:clamp(14px,4vw,16px)}
+html,body{height:100%;margin:0}
+body{font-family:Arial,sans-serif;background:#f0f4f8;padding:0;min-height:100vh}
+.box{width:100%;max-width:640px;margin:0 auto;background:#fff;padding:28px 20px}
+@media(min-width:640px){body{padding:24px;display:flex;align-items:center;justify-content:center}.box{border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.1)}}
+h1{color:#1a365d;margin:0 0 8px;font-size:26px}
+p.sub{color:#4a5568;margin:0 0 20px;font-size:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+label{display:block;font-weight:bold;color:#2d3748;margin-bottom:5px;font-size:15px}
+input[type=text]{width:100%;padding:12px;border:1px solid #cbd5e0;border-radius:6px;font-size:16px}
 input:focus{outline:none;border-color:#4299e1}
 .preview{background:#f7fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:20px;overflow-x:auto}
-.preview table{width:100%;border-collapse:collapse;font-size:clamp(12px,3.2vw,14px)}
-.preview th{background:#2b6cb0;color:#fff;padding:8px 6px;text-align:center}
-.preview td{padding:7px 6px;border-bottom:1px solid #e2e8f0;text-align:center}
-.count{color:#276749;font-weight:bold;margin-bottom:10px;font-size:clamp(14px,3.8vw,16px)}
-button{background:#276749;color:#fff;border:none;padding:16px 32px;border-radius:6px;font-size:clamp(16px,4.5vw,18px);cursor:pointer;width:100%;margin-top:4px}
-button:hover{background:#22543d}
-a.back{display:block;text-align:center;margin-top:14px;color:#4a5568;text-decoration:none;font-size:clamp(14px,3.8vw,16px)}
-a.back:hover{color:#2d3748}
+.preview table{width:100%;border-collapse:collapse;font-size:14px}
+.preview th{background:#2b6cb0;color:#fff;padding:9px 6px;text-align:center}
+.preview td{padding:8px 6px;border-bottom:1px solid #e2e8f0;text-align:center}
+.count{color:#276749;font-weight:bold;margin-bottom:10px;font-size:16px}
+button{background:#276749;color:#fff;border:none;padding:18px;border-radius:8px;font-size:20px;cursor:pointer;width:100%;margin-top:6px;font-weight:bold}
+button:active{background:#22543d}
+a.back{display:block;text-align:center;margin-top:16px;color:#4a5568;text-decoration:none;font-size:16px}
 </style></head><body><div class="box">
 <h1>✅ אישור נתונים</h1>
 <p class="sub">בדוק/עדכן את הפרטים הבאים לפני יצירת הקובץ.</p>
