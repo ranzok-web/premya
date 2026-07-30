@@ -418,38 +418,41 @@ def build_pdf_report(header, entries):
     """Overlay filled data onto the PDF template."""
     packet = io.BytesIO()
     c = canvas.Canvas(packet, pagesize=A4)
-    W, H = A4  # 595.27 x 841.89
-
     font = _HEB_FONT
 
     # ── Header fields ──────────────────────────────────────────────
-    c.setFont(font, 11)
-    # סקטור (right side, ~80pt from top)
-    c.drawRightString(490, H - 83, _heb(header.get("sector", "")))
-    # חודש דיווח
-    c.drawRightString(490, H - 107, header.get("month", ""))
-    # Employee row: מס' עובד | שם פרטי | שם משפחה
+    # Positions derived from PDF geometry (underline rects extracted from template)
+    c.setFont(font, 9)
+    # סקטור: underline at Y=725.9, right_edge X=424
+    c.drawRightString(424, 728, _heb(header.get("sector", "")))
+    # חודש דיווח: underline at Y=697.4, right_edge X=377
+    c.drawRightString(377, 700, header.get("month", ""))
+    # Employee row (underlines at Y=650.4):
     name_parts = header.get("employee_name", "").split()
     first_name = name_parts[0] if name_parts else ""
     last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
-    c.drawRightString(510, H - 140, header.get("employee_id", ""))
-    c.drawRightString(370, H - 140, _heb(first_name))
-    c.drawRightString(215, H - 140, _heb(last_name))
+    c.drawRightString(441, 653, header.get("employee_id", ""))   # מס' עובד X=394-441
+    c.drawRightString(307, 653, _heb(first_name))                # שם פרטי X=275-307
+    c.drawRightString(160, 653, _heb(last_name))                 # שם משפחה X=106-160
 
     # ── Table rows ──────────────────────────────────────────────────
-    # First data row center-y (from bottom): ~651, row height ~17.5pt
-    row_y_first = H - 190
-    row_h = 17.5
-    c.setFont(font, 10)
+    # Row Y-bottom values extracted directly from PDF template geometry.
+    # Text baseline = row_bottom + 4 (slightly above vertical center for 9pt font).
+    # Column X centers: תאריך=457.5, משעה=351, עד שעה=244.5, סה"כ=138
+    ROW_BOTTOMS = [
+        579.07, 565.87, 552.79, 539.59, 526.39, 513.31, 500.11, 487.03,
+        473.83, 460.75, 447.53, 434.33, 421.25, 408.05, 394.97, 381.77,
+        368.69, 355.49, 342.29, 329.21, 316.01, 302.90, 289.70, 276.62,
+    ]
+    c.setFont(font, 9)
     for i, (d, entry, exit_) in enumerate(entries[:24]):
-        y = row_y_first - i * row_h
+        y = ROW_BOTTOMS[i] + 4
         total_min = (exit_.hour * 60 + exit_.minute) - (entry.hour * 60 + entry.minute)
         total_str = f"{total_min // 60}:{total_min % 60:02d}"
-        # Columns (right→left): תאריך | משעה | עד שעה | סה"כ
-        c.drawCentredString(478, y, d.strftime("%d/%m/%Y"))
-        c.drawCentredString(358, y, entry.strftime("%H:%M"))
-        c.drawCentredString(238, y, exit_.strftime("%H:%M"))
-        c.drawCentredString(108, y, total_str)
+        c.drawCentredString(457.5, y, d.strftime("%d/%m/%Y"))
+        c.drawCentredString(351,   y, entry.strftime("%H:%M"))
+        c.drawCentredString(244.5, y, exit_.strftime("%H:%M"))
+        c.drawCentredString(138,   y, total_str)
 
     c.save()
     packet.seek(0)
