@@ -432,8 +432,8 @@ def build_pdf_report(header, entries):
     first_name = name_parts[0] if name_parts else ""
     last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
     c.drawRightString(441, 653, header.get("employee_id", ""))   # מס' עובד X=394-441
-    c.drawRightString(307, 653, _heb(first_name))                # שם פרטי X=275-307
-    c.drawRightString(160, 653, _heb(last_name))                 # שם משפחה X=106-160
+    c.drawRightString(307, 653, _heb(last_name))                 # שם פרטי X=275-307
+    c.drawRightString(160, 653, _heb(first_name))                # שם משפחה X=106-160
 
     # ── Table rows ──────────────────────────────────────────────────
     # Row Y-bottom values extracted directly from PDF template geometry.
