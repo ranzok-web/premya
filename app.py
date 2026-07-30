@@ -7,10 +7,31 @@ from flask import Flask, request, send_file, render_template_string
 import pypdf
 import openpyxl
 from openpyxl.styles import Font, Alignment
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import A4
 
 app = Flask(__name__)
 
 TEMPLATE_PATH = Path(__file__).parent / "טופס פרמיה מדריך עיוני.xlsx"
+PDF_TEMPLATE_PATH = Path(__file__).parent / "טופס שעות פרמיה.pdf"
+
+# Register Hebrew-capable font once at startup
+_HEB_FONT = "Helvetica"
+for _fp in [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+    "C:/Windows/Fonts/arial.ttf",
+]:
+    if Path(_fp).exists():
+        try:
+            pdfmetrics.registerFont(TTFont("HebFont", _fp))
+            _HEB_FONT = "HebFont"
+        except Exception:
+            pass
+        break
 
 # The garbled encoding of עיוני as extracted by pypdf from this Hilan PDF font
 YONI_MARKER = "\x05\xe2\x05\xd9\x05\xd5\x05\xe0\x05\xd9"
@@ -384,6 +405,69 @@ def index():
     return render_template_string(UPLOAD_HTML, error=error)
 
 
+def _heb(s):
+    """Convert Hebrew string to visual RTL order for reportlab."""
+    try:
+        from bidi.algorithm import get_display
+        return get_display(str(s))
+    except ImportError:
+        return str(s)
+
+
+def build_pdf_report(header, entries):
+    """Overlay filled data onto the PDF template."""
+    packet = io.BytesIO()
+    c = canvas.Canvas(packet, pagesize=A4)
+    W, H = A4  # 595.27 x 841.89
+
+    font = _HEB_FONT
+
+    # ── Header fields ──────────────────────────────────────────────
+    c.setFont(font, 11)
+    # סקטור (right side, ~80pt from top)
+    c.drawRightString(490, H - 83, _heb(header.get("sector", "")))
+    # חודש דיווח
+    c.drawRightString(490, H - 107, header.get("month", ""))
+    # Employee row: מס' עובד | שם פרטי | שם משפחה
+    name_parts = header.get("employee_name", "").split()
+    first_name = name_parts[0] if name_parts else ""
+    last_name = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+    c.drawRightString(510, H - 140, header.get("employee_id", ""))
+    c.drawRightString(370, H - 140, _heb(first_name))
+    c.drawRightString(215, H - 140, _heb(last_name))
+
+    # ── Table rows ──────────────────────────────────────────────────
+    # First data row center-y (from bottom): ~651, row height ~17.5pt
+    row_y_first = H - 190
+    row_h = 17.5
+    c.setFont(font, 10)
+    for i, (d, entry, exit_) in enumerate(entries[:24]):
+        y = row_y_first - i * row_h
+        total_min = (exit_.hour * 60 + exit_.minute) - (entry.hour * 60 + entry.minute)
+        total_str = f"{total_min // 60}:{total_min % 60:02d}"
+        # Columns (right→left): תאריך | משעה | עד שעה | סה"כ
+        c.drawCentredString(478, y, d.strftime("%d/%m/%Y"))
+        c.drawCentredString(358, y, entry.strftime("%H:%M"))
+        c.drawCentredString(238, y, exit_.strftime("%H:%M"))
+        c.drawCentredString(108, y, total_str)
+
+    c.save()
+    packet.seek(0)
+
+    # Merge overlay onto template
+    template_reader = pypdf.PdfReader(str(PDF_TEMPLATE_PATH))
+    overlay_reader = pypdf.PdfReader(packet)
+    writer = pypdf.PdfWriter()
+    page = template_reader.pages[0]
+    page.merge_page(overlay_reader.pages[0])
+    writer.add_page(page)
+
+    out = io.BytesIO()
+    writer.write(out)
+    out.seek(0)
+    return out
+
+
 @app.route("/generate", methods=["POST"])
 def generate():
     pdf_b64 = request.form.get("pdf_b64", "")
@@ -395,12 +479,13 @@ def generate():
     }
     pdf_bytes = base64.b64decode(pdf_b64)
     _, entries = extract_from_pdf(pdf_bytes)
-    excel_bytes = build_excel(entries, header)
+    out = build_pdf_report(header, entries)
+    month_safe = header["month"].replace("/", "-")
     return send_file(
-        io.BytesIO(excel_bytes),
+        out,
         as_attachment=True,
-        download_name=f"פרמיה מדריך עיוני {header['month'].replace('/', '-')}.xlsx",
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        download_name=f"טופס פרמיה {month_safe}.pdf",
+        mimetype="application/pdf"
     )
 
 

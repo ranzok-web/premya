@@ -2,3 +2,5 @@ flask
 pypdf
 openpyxl
 gunicorn
+reportlab
+python-bidi
